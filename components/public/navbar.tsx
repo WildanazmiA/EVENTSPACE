@@ -10,10 +10,12 @@ export async function Navbar() {
   const user = session?.user;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="sticky top-0 z-40 border-b border-[#b8d5bf]/70 bg-[#daf1de]/90 backdrop-blur-xl supports-[backdrop-filter]:bg-[#daf1de]/75">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 lg:px-8">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <CalendarDays className="size-5" aria-hidden="true" />
+          <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[3px_3px_8px_#a9c9b0,-3px_-3px_8px_#ffffff]">
+            <CalendarDays className="size-[18px]" aria-hidden="true" />
+          </span>
           EventSpace
         </Link>
 

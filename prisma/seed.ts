@@ -24,6 +24,7 @@ async function upsertUser(email: string, name: string, password: string, role: "
 async function main() {
   const admin = await upsertUser("admin@eventspace.test", "Admin EventSpace", "Admin123!", "ADMIN");
   await upsertUser("user@eventspace.test", "Pengguna Uji", "User123!", "USER");
+  await upsertUser("user2@eventspace.test", "Pengguna Uji 2", "12345678", "USER");
 
   const events = [
     {
