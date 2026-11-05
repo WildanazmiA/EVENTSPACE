@@ -30,6 +30,7 @@ export type EventFormValues = Partial<{
   slug: string;
   description: string;
   image: string;
+  performer: string;
   category: string;
   location: string;
   city: string;
@@ -114,6 +115,18 @@ export function EventForm({ action, defaultValues, submitLabel }: EventFormProps
               setTitleValue(e.target.value);
               if (!slugEdited) setSlugValue(slugify(e.target.value));
             }}
+          />
+        </FormField>
+
+        <FormField
+          id="performer"
+          label="Penampil/artis"
+          error={errors.performer?.[0]}
+          hint="Opsional. Isi nama artis atau lineup agar event mudah dicari dan dikelompokkan di Favorit."
+        >
+          <Input
+            {...fieldProps("performer", errors.performer?.[0], "Contoh: Rossa")}
+            defaultValue={values.performer}
           />
         </FormField>
 

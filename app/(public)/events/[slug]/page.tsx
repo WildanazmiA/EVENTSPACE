@@ -67,6 +67,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary">{event.category}</Badge>
+          {event.performer ? <Badge variant="outline">Penampil: {event.performer}</Badge> : null}
           {event.status === "CANCELLED" ? <Badge variant="destructive">Dibatalkan</Badge> : null}
           {event.status === "FINISHED" ? <Badge variant="outline">Selesai</Badge> : null}
         </div>

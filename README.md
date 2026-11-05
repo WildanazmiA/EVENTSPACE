@@ -5,7 +5,8 @@ Platform pencarian dan discovery event lokal di Samarinda dan sekitarnya.
 ## Status pengerjaan
 
 Selesai: tahap 1-12 penuh, tahap 13 (favorit), tahap 15 (SEO: metadata, sitemap, robots.txt), dan rate limiting login dari tahap 16.
-Sengaja ditunda sesuai permintaan awal: seed data, automated testing, dan deployment.
+Juga selesai: seed data (`prisma/seed.ts`), yang sebelumnya ditunda bersama testing dan deployment.
+Belum dikerjakan: automated testing dan deployment.
 
 ## Yang baru di checkpoint ini
 
@@ -44,7 +45,19 @@ Sengaja ditunda sesuai permintaan awal: seed data, automated testing, dan deploy
    npx prisma migrate dev --name init
    ```
 
-6. Jalankan project:
+6. Isi data contoh (2 akun dan 10 event, opsional tapi disarankan):
+
+   ```
+   npx prisma db seed
+   ```
+
+   Akun yang dibuat:
+   admin@eventspace.test / Admin123! (role ADMIN)
+   user@eventspace.test / User123! (role USER)
+
+   Aman dijalankan berkali-kali, data yang sama tidak akan dobel.
+
+7. Jalankan project:
 
    ```
    npm run dev
@@ -52,9 +65,9 @@ Sengaja ditunda sesuai permintaan awal: seed data, automated testing, dan deploy
 
    Buka http://localhost:3000
 
-## Membuat akun admin
+## Membuat akun admin tambahan
 
-Registrasi publik selalu membuat role USER. Cara membuat admin:
+Seed data sudah membuatkan satu akun admin (lihat langkah 6 di atas). Untuk akun admin lain:
 
 1. Daftar akun biasa di `/register`.
 2. Jalankan `npx prisma studio`.

@@ -26,6 +26,7 @@ function readEventForm(formData: FormData) {
     slug: get("slug"),
     description: get("description"),
     image: get("image"),
+    performer: get("performer"),
     category: get("category"),
     location: get("location"),
     city: get("city"),
@@ -48,6 +49,8 @@ function revalidateEventPaths(slug?: string) {
   revalidatePath("/admin/dashboard");
   if (slug) revalidatePath(`/events/${slug}`);
   revalidatePath("/events");
+  revalidatePath("/");
+  revalidatePath("/favorites");
 }
 
 export async function createEventAction(
@@ -84,6 +87,7 @@ export async function createEventAction(
         slug: data.slug,
         description: data.description,
         image: data.image,
+        performer: data.performer || null,
         category: data.category,
         location: data.location,
         city: data.city,
@@ -159,6 +163,7 @@ export async function updateEventAction(
         slug: data.slug,
         description: data.description,
         image: data.image,
+        performer: data.performer || null,
         category: data.category,
         location: data.location,
         city: data.city,
