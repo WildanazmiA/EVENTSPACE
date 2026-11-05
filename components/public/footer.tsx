@@ -1,24 +1,25 @@
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 
 import { EVENT_CITIES } from "@/lib/validation/event";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border">
-      <div className="mx-auto max-w-6xl gap-8 px-4 py-10 sm:grid sm:grid-cols-3 lg:px-8">
-        <div className="space-y-2">
-          <p className="font-semibold tracking-tight">EventSpace</p>
-          <p className="text-sm text-muted-foreground">
-            Platform pencarian dan discovery event lokal di Samarinda dan sekitarnya.
+    <footer className="public-footer">
+      <div className="public-footer__main">
+        <div className="public-footer__about-wrap">
+          <p className="public-footer__brand">event<span>space</span></p>
+          <p className="public-footer__about">
+            Ruang untuk bertemu, belajar, dan merayakan hal baru di Samarinda dan sekitarnya.
           </p>
         </div>
 
-        <div className="mt-6 space-y-2 sm:mt-0">
-          <p className="text-sm font-medium">Wilayah</p>
-          <ul className="space-y-1 text-sm text-muted-foreground">
+        <div>
+          <p className="public-footer__heading">Jelajahi wilayah</p>
+          <ul className="public-footer__links">
             {EVENT_CITIES.map((city) => (
               <li key={city}>
-                <Link href={`/events?city=${encodeURIComponent(city)}`} className="hover:text-foreground hover:underline">
+                <Link href={`/events?city=${encodeURIComponent(city)}`}>
                   {city}
                 </Link>
               </li>
@@ -26,24 +27,25 @@ export function Footer() {
           </ul>
         </div>
 
-        <div className="mt-6 space-y-2 sm:mt-0">
-          <p className="text-sm font-medium">Tautan</p>
-          <ul className="space-y-1 text-sm text-muted-foreground">
+        <div>
+          <p className="public-footer__heading">Tautan</p>
+          <ul className="public-footer__links">
             <li>
-              <Link href="/events" className="hover:text-foreground hover:underline">
+              <Link href="/events">
                 Jelajahi event
               </Link>
             </li>
             <li>
-              <Link href="/admin/login" className="hover:text-foreground hover:underline">
-                Login admin
+              <Link href="/register">
+                Buat akun <ArrowUpRight size={12} />
               </Link>
             </li>
           </ul>
         </div>
       </div>
-      <div className="border-t border-border px-4 py-4 text-xs text-muted-foreground lg:px-8">
-        &copy; {new Date().getFullYear()} EventSpace &middot; Dibuat untuk tugas akhir semester.
+      <div className="public-footer__bottom">
+        <span>&copy; {new Date().getFullYear()} EventSpace &middot; Samarinda, Indonesia</span>
+        <span>Dibuat untuk momen yang berarti.</span>
       </div>
     </footer>
   );

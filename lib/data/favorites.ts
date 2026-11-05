@@ -11,6 +11,15 @@ export async function getFavoriteEvents(userId: string) {
   return favorites.map((f) => f.event);
 }
 
+export async function getFavoriteEntries(userId: string) {
+  const favorites = await prisma.favorite.findMany({
+    where: { userId },
+    orderBy: { event: { startDate: "desc" } },
+    include: { event: true },
+  });
+  return favorites.map(({ event, attendedAt }) => ({ event, attendedAt }));
+}
+
 /** Set id event yang difavoritkan user ini, dipakai untuk menandai kartu event. */
 export async function getFavoritedEventIds(userId?: string): Promise<Set<string>> {
   if (!userId) return new Set();

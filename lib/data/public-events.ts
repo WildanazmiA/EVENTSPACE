@@ -19,6 +19,7 @@ export type PublicEventFilters = {
   price?: PriceFilter;
   status?: StatusFilter;
   sort?: SortOption;
+  year?: number;
 };
 
 function startOfDay(d: Date) {
@@ -51,12 +52,28 @@ function baseWhere(status?: StatusFilter): Prisma.EventWhereInput {
 
 export async function getPublicEvents(filters: PublicEventFilters) {
   const page = Math.max(1, filters.page ?? 1);
+  const yearStart = filters.year ? new Date(Date.UTC(filters.year, 0, 1)) : undefined;
+  const yearEnd = filters.year ? new Date(Date.UTC(filters.year + 1, 0, 1)) : undefined;
 
   const where: Prisma.EventWhereInput = {
-    ...baseWhere(filters.status),
-    ...dateRangeToWhere(filters.dateRange),
+    AND: [
+      baseWhere(filters.status),
+      dateRangeToWhere(filters.dateRange),
+      ...(yearStart && yearEnd
+        ? [{ startDate: { gte: yearStart, lt: yearEnd } }]
+        : []),
+    ],
     ...(filters.search
-      ? { title: { contains: filters.search, mode: "insensitive" as const } }
+      ? {
+          OR: [
+            { title: { contains: filters.search, mode: "insensitive" as const } },
+            { performer: { contains: filters.search, mode: "insensitive" as const } },
+            { description: { contains: filters.search, mode: "insensitive" as const } },
+            { organizer: { contains: filters.search, mode: "insensitive" as const } },
+            { location: { contains: filters.search, mode: "insensitive" as const } },
+            { city: { contains: filters.search, mode: "insensitive" as const } },
+          ],
+        }
       : {}),
     ...(filters.category ? { category: filters.category } : {}),
     ...(filters.city ? { city: filters.city } : {}),

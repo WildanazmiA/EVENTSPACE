@@ -25,6 +25,7 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
     slug: event.slug,
     description: event.description,
     image: event.image,
+    performer: event.performer ?? "",
     category: event.category,
     location: event.location,
     city: event.city,

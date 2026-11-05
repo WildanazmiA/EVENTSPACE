@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { FilterBar } from "@/components/public/filter-bar";
-import { EventGrid } from "@/components/public/event-grid";
+import { CityEventSections } from "@/components/public/city-event-sections";
 import { Pagination } from "@/components/shared/pagination";
 import { getCurrentUser } from "@/lib/auth/guards";
 import { getFavoritedEventIds } from "@/lib/data/favorites";
@@ -28,6 +28,7 @@ type EventsPageProps = {
     price?: string;
     status?: string;
     sort?: string;
+    year?: string;
   }>;
 };
 
@@ -44,6 +45,7 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     price: (params.price as PriceFilter) || "all",
     status: (params.status as StatusFilter) || "all",
     sort: (params.sort as SortOption) || "newest",
+    year: Number(params.year) || undefined,
   };
 
   const [{ events, totalPages }, user] = await Promise.all([
@@ -61,17 +63,17 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
     if (filters.price !== "all") next.set("price", filters.price);
     if (filters.status !== "all") next.set("status", filters.status);
     if (filters.sort !== "newest") next.set("sort", filters.sort);
+    if (filters.year) next.set("year", String(filters.year));
     next.set("page", String(targetPage));
     return `/events?${next.toString()}`;
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-10 lg:px-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Jelajahi Event</h1>
-        <p className="text-sm text-muted-foreground">
-          Temukan event di Samarinda dan wilayah sekitarnya.
-        </p>
+    <div className="events-archive">
+      <div className="events-archive__header">
+        <p className="eyebrow"><span className="eyebrow__dot" /> Agenda lokal</p>
+        <h1>Semua hal menarik,<br /><em>di satu tempat.</em></h1>
+        <p>Temukan event di Samarinda dan wilayah sekitarnya.</p>
       </div>
 
       <FilterBar
@@ -83,14 +85,20 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
           price: params.price,
           status: params.status,
           sort: params.sort,
+          year: params.year,
         }}
       />
 
-      <EventGrid
-        events={events}
-        emptyMessage="Coba ubah kata kunci atau filter yang kamu pakai."
-        favoritedIds={favoritedIds}
-      />
+      <section className="events-archive__results">
+        <div className="events-section__heading">
+          <div><p className="eyebrow">Jelajahi agenda</p><h2>Pilihan event</h2></div>
+          <span className="events-archive__count">Halaman {page}{totalPages > 1 ? ` dari ${totalPages}` : ""}</span>
+        </div>
+        <CityEventSections
+          events={events}
+          favoritedIds={favoritedIds}
+        />
+      </section>
 
       <Pagination page={page} totalPages={totalPages} buildHref={buildHref} />
     </div>

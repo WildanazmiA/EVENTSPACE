@@ -1,99 +1,145 @@
+﻿import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowDown, ArrowRight, CalendarDays, MapPin, Sparkles } from "lucide-react";
+import { ArrowDownRight, ArrowRight, CalendarDays, MapPin, Sparkles } from "lucide-react";
 
-import { SearchBar } from "@/components/public/search-bar";
-import { CategoryFilter } from "@/components/public/category-filter";
+import { FilterBar } from "@/components/public/filter-bar";
 import { EventGrid } from "@/components/public/event-grid";
-import { NearbyEvents } from "@/components/public/nearby-events";
+import { ConcertShowcase } from "@/components/public/concert-showcase";
+import { Pagination } from "@/components/shared/pagination";
 import { getCurrentUser } from "@/lib/auth/guards";
 import { getFavoritedEventIds } from "@/lib/data/favorites";
 import {
-  getGeoCandidateEvents,
-  getThisWeekEvents,
-  getUpcomingEvents,
+  getPublicEvents,
+  type DateRangeFilter,
+  type PriceFilter,
+  type StatusFilter,
+  type SortOption,
 } from "@/lib/data/public-events";
 
-export default async function HomePage() {
-  const user = await getCurrentUser();
-  const [geoCandidates, thisWeek, upcoming, favoritedIds] = await Promise.all([
-    getGeoCandidateEvents(),
-    getThisWeekEvents(8),
-    getUpcomingEvents(8),
-    getFavoritedEventIds(user?.id),
+export const metadata: Metadata = {
+  title: "Temukan Event",
+  description: "Ruang untuk bertemu, belajar, dan merayakan hal baru di Samarinda dan sekitarnya.",
+};
+
+type EventsPageProps = {
+  searchParams: Promise<{
+    page?: string;
+    search?: string;
+    category?: string;
+    city?: string;
+    dateRange?: string;
+    price?: string;
+    status?: string;
+    sort?: string;
+    year?: string;
+  }>;
+};
+
+export default async function EventsPage({ searchParams }: EventsPageProps) {
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const filters = {
+    page,
+    search: params.search?.trim() || undefined,
+    category: params.category && params.category !== "all" ? params.category : undefined,
+    city: params.city && params.city !== "all" ? params.city : undefined,
+    dateRange: (params.dateRange as DateRangeFilter) || "all",
+    price: (params.price as PriceFilter) || "all",
+    status: (params.status as StatusFilter) || "all",
+    sort: (params.sort as SortOption) || "newest",
+    year: Number(params.year) || undefined,
+  };
+
+  const [{ events, totalPages }, user] = await Promise.all([
+    getPublicEvents(filters),
+    getCurrentUser(),
   ]);
+  const favoritedIds = await getFavoritedEventIds(user?.id);
+  const hasActiveFilters = Boolean(
+    params.search ||
+      params.category ||
+      params.city ||
+      (params.dateRange && params.dateRange !== "all") ||
+      (params.price && params.price !== "all") ||
+      (params.status && params.status !== "all") ||
+      (params.year && params.year !== "all"),
+  );
+
+  function buildHref(targetPage: number) {
+    const next = new URLSearchParams();
+    if (filters.search) next.set("search", filters.search);
+    if (filters.category) next.set("category", filters.category);
+    if (filters.city) next.set("city", filters.city);
+    if (filters.dateRange !== "all") next.set("dateRange", filters.dateRange);
+    if (filters.price !== "all") next.set("price", filters.price);
+    if (filters.status !== "all") next.set("status", filters.status);
+    if (filters.sort !== "newest") next.set("sort", filters.sort);
+    if (filters.year) next.set("year", String(filters.year));
+    next.set("page", String(targetPage));
+    return `/?${next.toString()}`;
+  }
+
+  function buildExploreHref() {
+    const next = new URLSearchParams();
+    if (filters.search) next.set("search", filters.search);
+    if (filters.category) next.set("category", filters.category);
+    if (filters.city) next.set("city", filters.city);
+    if (filters.dateRange !== "all") next.set("dateRange", filters.dateRange);
+    if (filters.price !== "all") next.set("price", filters.price);
+    if (filters.status !== "all") next.set("status", filters.status);
+    if (filters.sort !== "newest") next.set("sort", filters.sort);
+    if (filters.year) next.set("year", String(filters.year));
+    const query = next.toString();
+    return query ? `/events?${query}` : "/events";
+  }
+
+  const heroImage = events[0]?.image;
 
   return (
-    <div className="space-y-14 pb-20 pt-6 lg:pt-10">
-      <section className="mx-auto w-[calc(100%-2rem)] max-w-6xl relative isolate overflow-hidden rounded-[2rem] bg-[#0b2b26] px-6 py-10 text-[#daf1de] shadow-[0_24px_60px_-28px_#051f20aa] sm:px-10 sm:py-14 lg:px-14 lg:py-16">
-        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_80%_0%,#8eb69b55,transparent_42%),radial-gradient(ellipse_at_10%_100%,#163832,transparent_48%)]" />
-        <div className="absolute -right-16 -top-20 -z-10 size-72 rounded-full border border-[#8eb69b]/20 sm:right-10 sm:top-8 sm:size-96" />
-        <div className="absolute right-8 top-28 -z-10 hidden h-32 w-64 rounded-full bg-[#163832] shadow-[0_20px_40px_#051f2080] sm:block" />
-        <div className="absolute right-8 top-40 -z-10 hidden h-32 w-64 rounded-full bg-[#235347] shadow-[0_20px_40px_#051f2080] sm:block" />
-        <div className="max-w-2xl">
-          <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#8eb69b]/35 bg-[#163832]/70 px-3 py-1.5 text-xs font-medium tracking-wide text-[#c5e1cb]">
-            <Sparkles className="size-3.5" aria-hidden="true" />
-            RUANG UNTUK MOMEN BERIKUTNYA
-          </span>
-          <h1 className="max-w-xl text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
-            Temukan cerita yang dimulai <span className="text-[#8eb69b]">di sini.</span>
-          </h1>
-          <p className="mt-5 max-w-lg text-sm leading-6 text-[#c4d9ca] sm:text-base">
-            Konser, ruang kreatif, dan pertemuan baru di Samarinda. Pilih pengalaman yang terasa paling dekat denganmu.
-          </p>
-          <div className="mt-8 max-w-xl rounded-2xl bg-[#daf1de] p-2 shadow-[0_12px_30px_#051f2055] sm:rounded-full">
-            <SearchBar size="lg" />
-          </div>
-          <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[#c4d9ca]">
-            <span className="inline-flex items-center gap-1.5"><MapPin className="size-3.5" aria-hidden="true" /> Samarinda &amp; sekitarnya</span>
-            <span className="inline-flex items-center gap-1.5"><CalendarDays className="size-3.5" aria-hidden="true" /> Temukan agenda terbaru</span>
+    <div className="public-home">
+      <section className="home-hero" style={heroImage ? { backgroundImage: `linear-gradient(90deg, rgba(10,10,10,.88) 0%, rgba(20,17,17,.68) 48%, rgba(20,17,17,.16) 100%), url("${heroImage}")` } : undefined}>
+        <div className="home-hero__grain" aria-hidden="true" />
+        <div className="home-hero__content">
+          <p className="eyebrow home-hero__eyebrow"><Sparkles size={14} /> Event lokal, cerita tak terlupakan</p>
+          <h1>Temukan ruang<br />untuk <em>ide baru.</em></h1>
+          <p className="home-hero__intro">Dari obrolan kecil sampai panggung besar—temukan hal menarik yang sedang terjadi di sekitarmu.</p>
+          <div className="home-hero__actions">
+            <Link href="#jelajahi" className="button-pill button-pill--light">Jelajahi event <ArrowRight size={16} /></Link>
+            <span className="home-hero__location"><MapPin size={15} /> Samarinda & sekitarnya</span>
           </div>
         </div>
-        <Link href="#agenda" className="absolute bottom-7 right-8 hidden size-11 items-center justify-center rounded-full border border-[#8eb69b]/40 text-[#daf1de] transition hover:bg-[#8eb69b]/15 sm:flex" aria-label="Jelajahi agenda">
-          <ArrowDown className="size-5" />
-        </Link>
+        <div className="home-hero__note"><span>01 / 03</span><span className="home-hero__line" /><span>Temukan pengalamanmu</span></div>
+        <a className="home-hero__scroll" href="#jelajahi" aria-label="Gulir ke daftar event"><ArrowDownRight size={19} /></a>
       </section>
 
-      <section className="mx-auto max-w-6xl space-y-6 px-4 lg:px-8">
-        <CategoryFilter />
-      </section>
-
-      {geoCandidates.length > 0 ? (
-        <section id="agenda" className="mx-auto max-w-6xl space-y-4 px-4 lg:px-8">
-          <div>
-            <p className="mb-1 text-xs font-semibold tracking-[0.18em] text-[#54756b]">DI SEKITARMU</p>
-            <h2 className="text-2xl font-semibold tracking-tight">Event Terdekat</h2>
-          </div>
-          <NearbyEvents candidates={geoCandidates} favoritedIds={favoritedIds} />
-        </section>
-      ) : null}
-
-      {thisWeek.length > 0 ? (
-        <section id={geoCandidates.length === 0 ? "agenda" : undefined} className="mx-auto max-w-6xl space-y-4 px-4 lg:px-8">
-          <div className="flex items-center justify-between">
+      <div className="home-content" id="jelajahi">
+        <section className="discover-section">
+          <div className="section-heading">
             <div>
-              <p className="mb-1 text-xs font-semibold tracking-[0.18em] text-[#54756b]">PILIHAN MINGGU INI</p>
-              <h2 className="text-2xl font-semibold tracking-tight">Agenda minggu ini</h2>
+              <p className="eyebrow"><span className="eyebrow__dot" /> Pilih pengalamanmu</p>
+              <h2>Yang sedang <em>berlangsung.</em></h2>
             </div>
-            <Link href="/events?dateRange=week" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
-              Lihat semua <ArrowRight className="size-3.5" aria-hidden="true" />
-            </Link>
+            <p className="section-heading__aside">Tempat baru untuk belajar sesuatu,<br className="hidden sm:block" /> bertemu orang baru, dan pulang membawa cerita.</p>
           </div>
-          <EventGrid events={thisWeek} favoritedIds={favoritedIds} />
+          <div className="filter-panel">
+            <div className="filter-panel__top"><span><CalendarDays size={16} /> Temukan event pilihanmu</span><span className="filter-panel__hint">Atur pencarian</span></div>
+            <FilterBar path="/" values={{ search: params.search, category: params.category, city: params.city, dateRange: params.dateRange, price: params.price, status: params.status, sort: params.sort, year: params.year }} />
+          </div>
         </section>
-      ) : null}
 
-      <section id={geoCandidates.length === 0 && thisWeek.length === 0 ? "agenda" : undefined} className="mx-auto max-w-6xl space-y-4 px-4 lg:px-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="mb-1 text-xs font-semibold tracking-[0.18em] text-[#54756b]">JANGAN LEWATKAN</p>
-            <h2 className="text-2xl font-semibold tracking-tight">Event Mendatang</h2>
+        <section className="events-section">
+          <div className="events-section__heading">
+            <div><p className="eyebrow">Kurasi untukmu</p><h2>Jadwal pilihan</h2></div>
+            <Link href={buildExploreHref()} className="text-link">Lihat semua <ArrowRight size={16} /></Link>
           </div>
-          <Link href="/events" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
-            Jelajahi semua <ArrowRight className="size-3.5" aria-hidden="true" />
-          </Link>
-        </div>
-        <EventGrid events={upcoming} emptyMessage="Belum ada event mendatang. Coba lagi nanti." favoritedIds={favoritedIds} />
-      </section>
+          {events.length > 0 || hasActiveFilters ? (
+            <EventGrid events={events} emptyMessage="Coba ubah kata kunci atau filter yang kamu pakai." favoritedIds={favoritedIds} />
+          ) : (
+            <ConcertShowcase />
+          )}
+          <Pagination page={page} totalPages={totalPages} buildHref={buildHref} />
+        </section>
+      </div>
     </div>
   );
 }

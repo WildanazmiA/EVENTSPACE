@@ -42,6 +42,7 @@ export const eventSchema = z
       .regex(slugRegex, "Slug hanya huruf kecil, angka, dan tanda hubung"),
     description: z.string().trim().min(20, "Deskripsi minimal 20 karakter"),
     image: z.string().trim().url("Poster wajib berupa URL gambar yang valid"),
+    performer: z.string().trim().max(150, "Nama penampil maksimal 150 karakter").optional(),
     category: z.enum(EVENT_CATEGORIES, {
       message: "Pilih kategori",
     }),
